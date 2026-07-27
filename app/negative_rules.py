@@ -1,6 +1,12 @@
 # Kural tabanlı negatif anahtar kelime aday tespiti.
 # Eşikler ve junk kelime listesi burada kolayca düzenlenebilir.
 
+from app.business_profile import (
+    NOT_OFFERED_ACTIVITIES,
+    OTHER_MAJOR_CITIES,
+    SERVICE_LOCATIONS,
+)
+
 JUNK_TERMS = {
     "ücretsiz", "bedava", "iş ilanı", "iş ilanları", "indir", "download",
     "nasıl yapılır", "nasıl kullanılır", "youtube", "resim", "görsel",
@@ -37,6 +43,18 @@ def find_candidates(
         matched_junk = [j for j in JUNK_TERMS if j in term_lower]
         if matched_junk:
             reasons.append(f"Alakasız kelime eşleşmesi: {', '.join(matched_junk)}")
+
+        matched_activity = [a for a in NOT_OFFERED_ACTIVITIES if a in term_lower]
+        if matched_activity:
+            reasons.append(
+                f"Sunulmayan hizmet/branş: {', '.join(matched_activity)}"
+            )
+
+        mentions_service_location = any(loc in term_lower for loc in SERVICE_LOCATIONS)
+        if not mentions_service_location:
+            matched_city = [c for c in OTHER_MAJOR_CITIES if c in term_lower]
+            if matched_city:
+                reasons.append(f"Hizmet bölgesi dışı şehir: {', '.join(matched_city)}")
 
         if reasons:
             candidates.append({**row, "reasons": reasons})
