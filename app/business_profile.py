@@ -37,8 +37,14 @@ OFFERED_SPORTS = [
     "basketbol",
 ]
 
-# Hizmet bölgesi - bu şehir/ilçe dışındaki aramalar muhtemelen alakasız
-SERVICE_LOCATIONS = ["izmir", "buca"]
+# Hizmet bölgesi - bu şehir/ilçe dışındaki aramalar muhtemelen alakasız.
+# İzmir merkez ilçeleri (Buca'ya makul mesafede) dahil edildi, bunlar
+# "hizmet bölgesi dışı şehir" olarak asla işaretlenmez, pozitif kabul edilir.
+SERVICE_LOCATIONS = [
+    "izmir", "buca", "bornova", "karşıyaka", "konak", "çiğli",
+    "gaziemir", "bayraklı", "balçova", "narlıdere", "karabağlar",
+    "kemalpaşa", "torbalı", "menderes",
+]
 
 # Sunulmadığı bilinen, sıkça karıştırılabilecek spor/aktivite dalları.
 # Bu dalların aranması, işletmenin sunmadığı bir hizmeti arayan
@@ -57,3 +63,8 @@ OTHER_MAJOR_CITIES = [
     "gaziantep", "mersin", "kayseri", "eskişehir", "samsun", "denizli",
     "manisa", "aydın",
 ]
+
+# Rakip firma isimleri. Bu isimleri arayıp bizim reklamımıza tıklayanlar
+# marka karşılaştırma trafiğidir - negatif kelime olarak ASLA işaretlenmez,
+# pozitif kabul edilir. İsimler öğrenildikçe buraya eklenecek.
+COMPETITOR_NAMES: list[str] = []

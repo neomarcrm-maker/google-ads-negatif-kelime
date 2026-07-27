@@ -2,6 +2,7 @@
 # Eşikler ve junk kelime listesi burada kolayca düzenlenebilir.
 
 from app.business_profile import (
+    COMPETITOR_NAMES,
     NOT_OFFERED_ACTIVITIES,
     OTHER_MAJOR_CITIES,
     SERVICE_LOCATIONS,
@@ -28,6 +29,10 @@ def find_candidates(
     candidates = []
     for row in search_terms:
         term_lower = row["search_term"].lower()
+
+        if any(comp in term_lower for comp in COMPETITOR_NAMES):
+            continue  # rakip marka araması - marka karşılaştırma trafiği, pozitif kabul edilir
+
         reasons = []
 
         if row["conversions"] == 0 and row["clicks"] >= min_clicks_zero_conv:
