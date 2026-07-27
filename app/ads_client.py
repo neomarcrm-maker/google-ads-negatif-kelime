@@ -43,14 +43,13 @@ def list_accounts() -> list[dict]:
           customer_client.status,
           customer_client.level
         FROM customer_client
-        WHERE customer_client.level <= 1
     """
 
     accounts = []
     response = ga_service.search(customer_id=mcc_id, query=query)
     for row in response:
         cc = row.customer_client
-        if cc.manager:
+        if cc.manager or cc.level == 0:
             continue
         accounts.append(
             {
