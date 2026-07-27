@@ -1,0 +1,11 @@
+# Bu dosyayı kopyalayıp "google-ads.yaml" adıyla kaydet ve kendi bilgilerinle doldur.
+# Gerçek google-ads.yaml dosyası .gitignore'da - asla repoya commit etme.
+# Render'da bu dosya yerine ortam değişkenleri (environment variables) kullanılır,
+# app/ads_client.py bu değerleri env var'dan okuyup runtime'da bu formatı oluşturur.
+
+developer_token: "BURAYA_DEVELOPER_TOKEN"
+client_id: "BURAYA_CLIENT_ID"
+client_secret: "BURAYA_CLIENT_SECRET"
+refresh_token: "BURAYA_REFRESH_TOKEN"
+login_customer_id: "BURAYA_MCC_ID"  # tire olmadan, sadece rakamlar
+use_proto_plus: true

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Google Ads Negatif Kelime Bulucu</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Google Ads Negatif Kelime Bulucu</h1>
+  </header>
+
+  <main>
+    <section class="controls">
+      <div class="field">
+        <label for="account">Hesap</label>
+        <select id="account"></select>
+      </div>
+
+      <div class="field">
+        <label for="date-range">Tarih Aralığı</label>
+        <select id="date-range">
+          <option value="LAST_7_DAYS">Son 7 gün</option>
+          <option value="LAST_14_DAYS">Son 14 gün</option>
+          <option value="LAST_30_DAYS" selected>Son 30 gün</option>
+          <option value="THIS_MONTH">Bu ay</option>
+          <option value="LAST_MONTH">Geçen ay</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="min-clicks">Min. tıklama (0 dönüşüm)</label>
+        <input type="number" id="min-clicks" value="3" min="1" />
+      </div>
+
+      <div class="field">
+        <label for="min-cost">Min. maliyet TL (0 dönüşüm)</label>
+        <input type="number" id="min-cost" value="50" min="0" />
+      </div>
+
+      <button id="analyze-btn">Analiz Et</button>
+    </section>
+
+    <section id="status" class="status"></section>
+
+    <section id="results" hidden>
+      <div class="results-header">
+        <span id="results-summary"></span>
+        <button id="apply-btn" disabled>Seçilenleri Negatif Olarak Ekle</button>
+      </div>
+      <table id="results-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="select-all" /></th>
+            <th>Arama Terimi</th>
+            <th>Kampanya</th>
+            <th>Ad Group</th>
+            <th>Tıklama</th>
+            <th>Maliyet (TL)</th>
+            <th>Dönüşüm</th>
+            <th>Sebep</th>
+          </tr>
+        </thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
