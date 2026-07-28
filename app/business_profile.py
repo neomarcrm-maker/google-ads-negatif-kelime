@@ -68,3 +68,11 @@ OTHER_MAJOR_CITIES = [
 # marka karşılaştırma trafiğidir - negatif kelime olarak ASLA işaretlenmez,
 # pozitif kabul edilir. İsimler öğrenildikçe buraya eklenecek.
 COMPETITOR_NAMES: list[str] = []
+
+# Dönemsel/sezonsal terimler - "yaz okulu" gibi aramalar gerçek bir hizmet
+# arayışı olabilir (işletme bu programları sunuyor olabilir), bu yüzden
+# negatif kelime olarak ASLA işaretlenmez, pozitif kabul edilir.
+SEASONAL_TERMS = [
+    "yaz okulu", "yaz kampı", "kış kampı", "yarıyıl kampı",
+    "sezonluk", "yaz dönemi", "kış dönemi", "yaz etkinliği",
+]

@@ -8,6 +8,7 @@ from app.business_profile import (
     COMPETITOR_NAMES,
     NOT_OFFERED_ACTIVITIES,
     OTHER_MAJOR_CITIES,
+    SEASONAL_TERMS,
     SERVICE_LOCATIONS,
 )
 
@@ -49,6 +50,9 @@ def find_candidates(search_terms: list[dict]) -> list[dict]:
 
         if any(comp in term_lower for comp in COMPETITOR_NAMES):
             continue  # rakip marka araması - marka karşılaştırma trafiği, pozitif kabul edilir
+
+        if any(season in term_lower for season in SEASONAL_TERMS):
+            continue  # donemsel/sezonsal arama - gercek hizmet arayisi olabilir, pozitif kabul edilir
 
         reasons = []
 
