@@ -9,8 +9,7 @@ from importlib import import_module
 from types import ModuleType
 
 PROFILE_MAP: dict[str, str] = {
-    # TODO: Atlas'ın gerçek customer ID'sini buraya yaz (tiresiz, örn: "1234567890")
-    "REPLACE_WITH_ATLAS_CUSTOMER_ID": "atlas",
+    "4103713203": "atlas",
 }
 
 
