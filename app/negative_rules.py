@@ -40,7 +40,9 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
     """profile: app/profiles/<hesap>.py modülü, ya da None (özel profili
     olmayan hesaplar için - bu durumda sadece BASE_JUNK_TERMS uygulanır).
     """
-    junk_terms = BASE_JUNK_TERMS | set(getattr(profile, "EXTRA_JUNK_TERMS", []))
+    junk_terms = (
+        BASE_JUNK_TERMS - set(getattr(profile, "JUNK_TERM_EXCEPTIONS", []))
+    ) | set(getattr(profile, "EXTRA_JUNK_TERMS", []))
     competitor_names = getattr(profile, "COMPETITOR_NAMES", [])
     seasonal_terms = getattr(profile, "SEASONAL_TERMS", [])
     not_offered_activities = getattr(profile, "NOT_OFFERED_ACTIVITIES", [])

@@ -22,6 +22,7 @@ OFFERED_PROGRAMS = [
     "montaj",
     "gaz dolumu",
     "periyodik bakım",
+    "ikinci el klima satışı",
 ]
 
 # Hizmet bölgesi - İzmir merkez ilçeleri. Bu ilçeler geçen aramalar
@@ -64,6 +65,11 @@ SEASONAL_TERMS = [
 
 # Bu hesap için genel (base) junk kelimelere ek bir kelime yok şimdilik.
 EXTRA_JUNK_TERMS: set[str] = set()
+
+# İSBAY ikinci el klima satışı da yapıyor - bu yüzden genel (base) junk
+# kelime listesindeki "ikinci el" / "second hand" bu hesap için ASLA
+# junk kelime sayılmaz (diğer hesaplarda alakasız sayılsa bile).
+JUNK_TERM_EXCEPTIONS = {"ikinci el", "second hand"}
 
 # Yaş kısıtı bu hesap için geçerli değil.
 MIN_TARGET_AGE_YEARS = None
