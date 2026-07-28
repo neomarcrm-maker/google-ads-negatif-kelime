@@ -9,7 +9,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from app.ads_client import list_accounts, fetch_search_terms
-from app.negative_rules import find_candidates, DEFAULT_MIN_CLICKS_ZERO_CONV, DEFAULT_MIN_COST_ZERO_CONV
+from app.negative_rules import find_candidates
 from app.mutate import add_negative_keywords
 
 app = FastAPI(title="Google Ads Negatif Kelime Bulucu")
@@ -36,8 +36,6 @@ def require_auth(credentials: HTTPBasicCredentials = Depends(security)):
 class AnalyzeRequest(BaseModel):
     customer_id: str
     date_range: str = "LAST_30_DAYS"
-    min_clicks_zero_conv: int = DEFAULT_MIN_CLICKS_ZERO_CONV
-    min_cost_zero_conv: float = DEFAULT_MIN_COST_ZERO_CONV
 
 
 class NegativeTerm(BaseModel):
@@ -71,11 +69,7 @@ def api_analyze(body: AnalyzeRequest, _auth: bool = Depends(require_auth)):
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(500, str(exc)) from exc
 
-    candidates = find_candidates(
-        search_terms,
-        min_clicks_zero_conv=body.min_clicks_zero_conv,
-        min_cost_zero_conv=body.min_cost_zero_conv,
-    )
+    candidates = find_candidates(search_terms)
     return {"total_terms": len(search_terms), "candidates": candidates}
 
 

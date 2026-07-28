@@ -1,7 +1,5 @@
 const accountSelect = document.getElementById("account");
 const dateRangeSelect = document.getElementById("date-range");
-const minClicksInput = document.getElementById("min-clicks");
-const minCostInput = document.getElementById("min-cost");
 const analyzeBtn = document.getElementById("analyze-btn");
 const applyBtn = document.getElementById("apply-btn");
 const statusEl = document.getElementById("status");
@@ -84,8 +82,6 @@ analyzeBtn.addEventListener("click", async () => {
       body: JSON.stringify({
         customer_id: customerId,
         date_range: dateRangeSelect.value,
-        min_clicks_zero_conv: Number(minClicksInput.value),
-        min_cost_zero_conv: Number(minCostInput.value),
       }),
     });
     if (!res.ok) throw new Error(await res.text());
