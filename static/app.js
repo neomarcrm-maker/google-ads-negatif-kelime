@@ -86,7 +86,10 @@ analyzeBtn.addEventListener("click", async () => {
     });
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
-    resultsSummary.textContent = `${data.total_terms} toplam arama teriminden ${data.candidates.length} negatif aday bulundu.`;
+    const profileNote = data.profile_used
+      ? `Profil: ${data.profile_used}`
+      : "Bu hesap için özel profil tanımlı değil, sadece genel kurallar uygulandı.";
+    resultsSummary.textContent = `${data.total_terms} toplam arama teriminden ${data.candidates.length} negatif aday bulundu. ${profileNote}`;
     renderCandidates(data.candidates);
     setStatus("Analiz tamamlandı.");
   } catch (err) {

@@ -1,7 +1,9 @@
 # Atlas Spor Merkezi (atlasspormerkezi.com.tr) işletme profili.
-# negative_rules.py bu dosyayı arama terimlerinin işletmeyle alakasını
-# değerlendirmek için kullanır. Farklı bir müşteri/proje için bu dosyayı
-# güncelleyip yeni bir profil oluşturmak yeterli.
+# negative_rules.py bu profili arama terimlerinin işletmeyle alakasını
+# değerlendirmek için kullanır. registry.py bu dosyayı hangi customer_id
+# ile eşleştireceğini belirler.
+
+DISPLAY_NAME = "Atlas Spor Merkezi"
 
 BUSINESS_NAME_VARIANTS = [
     "atlas spor merkezi",
@@ -11,7 +13,7 @@ BUSINESS_NAME_VARIANTS = [
     "atlas spor eğitim merkezi",
 ]
 
-# Sundukları eğitim/hizmet alanları
+# Sundukları eğitim/hizmet alanları (bilgi amaçlı)
 OFFERED_PROGRAMS = [
     "hareket eğitimi",
     "temel branş eğitimi",
@@ -26,7 +28,7 @@ OFFERED_PROGRAMS = [
     "özel gereksinim",
 ]
 
-# Sundukları spor branşları
+# Sundukları spor branşları (bilgi amaçlı)
 OFFERED_SPORTS = [
     "masa tenisi",
     "bisiklet",
@@ -47,8 +49,6 @@ SERVICE_LOCATIONS = [
 ]
 
 # Sunulmadığı bilinen, sıkça karıştırılabilecek spor/aktivite dalları.
-# Bu dalların aranması, işletmenin sunmadığı bir hizmeti arayan
-# alakasız trafiği işaret edebilir.
 NOT_OFFERED_ACTIVITIES = [
     "yüzme", "yüzme kursu", "yoga", "pilates", "karate", "taekwondo",
     "güreş", "boks", "kick boks", "vücut geliştirme", "crossfit",
@@ -64,15 +64,20 @@ OTHER_MAJOR_CITIES = [
     "manisa", "aydın",
 ]
 
-# Rakip firma isimleri. Bu isimleri arayıp bizim reklamımıza tıklayanlar
-# marka karşılaştırma trafiğidir - negatif kelime olarak ASLA işaretlenmez,
-# pozitif kabul edilir. İsimler öğrenildikçe buraya eklenecek.
+# Rakip firma isimleri - bu isimleri arayıp bizim reklamımıza tıklayanlar
+# marka karşılaştırma trafiğidir, ASLA negatif işaretlenmez.
 COMPETITOR_NAMES: list[str] = []
 
-# Dönemsel/sezonsal terimler - "yaz okulu" gibi aramalar gerçek bir hizmet
-# arayışı olabilir (işletme bu programları sunuyor olabilir), bu yüzden
-# negatif kelime olarak ASLA işaretlenmez, pozitif kabul edilir.
+# Dönemsel/sezonsal terimler - gerçek bir hizmet arayışı olabilir,
+# ASLA negatif işaretlenmez.
 SEASONAL_TERMS = [
     "yaz okulu", "yaz kampı", "kış kampı", "yarıyıl kampı",
     "sezonluk", "yaz dönemi", "kış dönemi", "yaz etkinliği",
 ]
+
+# Genel (base) junk kelimelere ek olarak bu hesaba özel eklenen kelimeler.
+EXTRA_JUNK_TERMS = {"belediye"}
+
+# Hedeflenen minimum yaş. Bunun altındaki bir yaş/ay geçen aramalar
+# negatif aday olarak işaretlenir. Yaş kısıtı olmayan hesaplarda None yapılır.
+MIN_TARGET_AGE_YEARS = 4

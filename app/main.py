@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from app.ads_client import list_accounts, fetch_search_terms
 from app.negative_rules import find_candidates
 from app.mutate import add_negative_keywords
+from app.profiles.registry import get_profile
 
 app = FastAPI(title="Google Ads Negatif Kelime Bulucu")
 templates = Jinja2Templates(directory="app/templates")
@@ -69,8 +70,13 @@ def api_analyze(body: AnalyzeRequest, _auth: bool = Depends(require_auth)):
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(500, str(exc)) from exc
 
-    candidates = find_candidates(search_terms)
-    return {"total_terms": len(search_terms), "candidates": candidates}
+    profile = get_profile(body.customer_id)
+    candidates = find_candidates(search_terms, profile=profile)
+    return {
+        "total_terms": len(search_terms),
+        "candidates": candidates,
+        "profile_used": getattr(profile, "DISPLAY_NAME", None),
+    }
 
 
 @app.post("/api/apply-negatives")
