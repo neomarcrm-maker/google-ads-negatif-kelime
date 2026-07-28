@@ -45,6 +45,7 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
     ) | set(getattr(profile, "EXTRA_JUNK_TERMS", []))
     competitor_names = getattr(profile, "COMPETITOR_NAMES", [])
     seasonal_terms = getattr(profile, "SEASONAL_TERMS", [])
+    sales_terms = getattr(profile, "SALES_TERMS", [])
     not_offered_activities = getattr(profile, "NOT_OFFERED_ACTIVITIES", [])
     service_locations = getattr(profile, "SERVICE_LOCATIONS", [])
     other_major_cities = getattr(profile, "OTHER_MAJOR_CITIES", [])
@@ -59,6 +60,9 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
 
         if any(season in term_lower for season in seasonal_terms):
             continue  # donemsel/sezonsal arama - gercek hizmet arayisi olabilir, pozitif kabul edilir
+
+        if any(sale in term_lower for sale in sales_terms):
+            continue  # satis firsati araması - gercek hizmet arayisi, pozitif kabul edilir
 
         reasons = []
 

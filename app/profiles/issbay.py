@@ -71,5 +71,13 @@ EXTRA_JUNK_TERMS: set[str] = set()
 # junk kelime sayılmaz (diğer hesaplarda alakasız sayılsa bile).
 JUNK_TERM_EXCEPTIONS = {"ikinci el", "second hand"}
 
+# Klima satışıyla ilgili arama terimleri - bunlar İSBAY için GERÇEK bir
+# satış fırsatıdır (sıfır/ikinci el klima satışı da yapıyorlar),
+# ASLA negatif işaretlenmez.
+SALES_TERMS = [
+    "klima satış", "klima satışı", "klima satın al", "klima al",
+    "sıfır klima", "kullanılmış klima", "klima fiyat", "klima fiyatları",
+]
+
 # Yaş kısıtı bu hesap için geçerli değil.
 MIN_TARGET_AGE_YEARS = None
