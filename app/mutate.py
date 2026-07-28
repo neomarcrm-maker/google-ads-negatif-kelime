@@ -35,12 +35,13 @@ def add_negative_keywords(
     if not operations:
         return {"added": 0, "results": []}
 
+    request = client.get_type("MutateCampaignCriteriaRequest")
+    request.customer_id = customer_id
+    request.operations = operations
+    request.validate_only = validate_only
+
     try:
-        response = criterion_service.mutate_campaign_criteria(
-            customer_id=customer_id,
-            operations=operations,
-            validate_only=validate_only,
-        )
+        response = criterion_service.mutate_campaign_criteria(request=request)
     except GoogleAdsException as ex:
         raise RuntimeError(_format_ads_exception(ex)) from ex
 
