@@ -2,6 +2,8 @@
 # Sadece anlam/alaka bazlı tespit yapılır (performans/maliyet kriteri yok).
 # Junk kelime listesi ve işletme profili burada kolayca düzenlenebilir.
 
+import re
+
 from app.business_profile import (
     COMPETITOR_NAMES,
     NOT_OFFERED_ACTIVITIES,
@@ -15,8 +17,29 @@ JUNK_TERMS = {
     "wallpaper", "free", "job", "jobs", "salary", "maaş", "kariyer",
     "course", "kurs", "tutorial", "eğitim videosu", "şikayet", "şikayetvar",
     "eksisozluk", "ekşi sözlük", "wikipedia", "vikipedi", "second hand",
-    "ikinci el", "sahibinden",
+    "ikinci el", "sahibinden", "belediye",
 }
+
+# Hedeflenen minimum yaş. Bunun altındaki bir yaş/ay geçen aramalar
+# negatif aday olarak işaretlenir.
+MIN_TARGET_AGE_YEARS = 4
+
+_AGE_YEAR_PATTERN = re.compile(r"(\d+)\s*yaş")
+_AGE_MONTH_PATTERN = re.compile(r"(\d+)\s*ayl?ık?\b|(\d+)\s*\bay\b")
+
+
+def _find_age_violation(term_lower: str) -> str | None:
+    for match in _AGE_YEAR_PATTERN.finditer(term_lower):
+        age = int(match.group(1))
+        if age < MIN_TARGET_AGE_YEARS:
+            return f"{age} yaş (minimum {MIN_TARGET_AGE_YEARS} yaş)"
+
+    for match in _AGE_MONTH_PATTERN.finditer(term_lower):
+        months = int(match.group(1) or match.group(2))
+        if months < MIN_TARGET_AGE_YEARS * 12:
+            return f"{months} aylık (minimum {MIN_TARGET_AGE_YEARS} yaş)"
+
+    return None
 
 
 def find_candidates(search_terms: list[dict]) -> list[dict]:
@@ -44,6 +67,10 @@ def find_candidates(search_terms: list[dict]) -> list[dict]:
             matched_city = [c for c in OTHER_MAJOR_CITIES if c in term_lower]
             if matched_city:
                 reasons.append(f"Hizmet bölgesi dışı şehir: {', '.join(matched_city)}")
+
+        age_violation = _find_age_violation(term_lower)
+        if age_violation:
+            reasons.append(f"Hedef yaş aralığı dışı: {age_violation}")
 
         if reasons:
             candidates.append({**row, "reasons": reasons})
