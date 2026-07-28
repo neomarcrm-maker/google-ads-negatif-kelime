@@ -10,6 +10,7 @@ from types import ModuleType
 
 PROFILE_MAP: dict[str, str] = {
     "4103713203": "atlas",
+    "1226048262": "issbay",
 }
 
 
