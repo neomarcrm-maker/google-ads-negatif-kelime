@@ -40,6 +40,13 @@ NOT_OFFERED_ACTIVITIES = [
     "beyaz eşya tamiri", "beyaz eşya servisi",
     "buzdolabı tamiri", "çamaşır makinesi tamiri", "bulaşık makinesi tamiri",
     "televizyon tamiri", "bilgisayar tamiri", "telefon tamiri",
+    # Farklı meslek dalı - sıhhi tesisat/tesisatçılık kombi-klima servisinden
+    # ayrı bir branştır.
+    "sıhhi tesisat", "tesisatçı",
+    # Marka garantili/ücretsiz "yetkili servis" arayanlar İSBAY'i değil,
+    # ürünü sattıkları markanın kendi servisini arıyor - İSBAY yetkili
+    # servis değil, bağımsız (ücretli) servistir.
+    "yetkili servis",
 ]
 
 # Büyük şehirler (İzmir hariç) - il/ilçe belirten aramalarda hizmet
@@ -63,8 +70,11 @@ SEASONAL_TERMS = [
     "yaz öncesi bakım", "kış öncesi bakım", "sezonluk bakım",
 ]
 
-# Bu hesap için genel (base) junk kelimelere ek bir kelime yok şimdilik.
-EXTRA_JUNK_TERMS: set[str] = set()
+# Kendin-yap / ürün arayışı - hizmet değil, kendi başına tamir/temizlik
+# yapmak için ürün/malzeme arayan kişiler servis talebi değildir.
+EXTRA_JUNK_TERMS: set[str] = {
+    "temizleme spreyi", "klima spreyi", "gerekli malzemeler",
+}
 
 # İSBAY ikinci el klima satışı da yapıyor - bu yüzden genel (base) junk
 # kelime listesindeki "ikinci el" / "second hand" bu hesap için ASLA
