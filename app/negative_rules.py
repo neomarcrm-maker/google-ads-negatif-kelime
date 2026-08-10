@@ -50,13 +50,33 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
     service_locations = getattr(profile, "SERVICE_LOCATIONS", [])
     other_major_cities = getattr(profile, "OTHER_MAJOR_CITIES", [])
     min_target_age_years = getattr(profile, "MIN_TARGET_AGE_YEARS", None)
+    require_context_terms = getattr(profile, "REQUIRE_CONTEXT_TERMS", [])
+    context_signal_terms = getattr(profile, "CONTEXT_SIGNAL_TERMS", [])
+    business_name_variants = getattr(profile, "BUSINESS_NAME_VARIANTS", [])
 
     candidates = []
     for row in search_terms:
         term_lower = row["search_term"].lower()
 
+        if any(name in term_lower for name in business_name_variants):
+            continue  # marka adı geçen arama - her zaman pozitif kabul edilir, diğer kontroller atlanır
+
         if any(comp in term_lower for comp in competitor_names):
             continue  # rakip marka araması - marka karşılaştırma trafiği, pozitif kabul edilir
+
+        # Bazı kelimeler tek başına çok genel/belirsizdir ve sadece profilde
+        # tanımlı bir "bağlam sinyali" (örn. engellilik ifadesi) eşlik ederse
+        # gerçek bir hizmet arayışı sayılır. Sinyal yoksa diğer tüm muafiyet
+        # kontrollerinden (sezonsal, satış vb.) önce doğrudan negatif adaydır.
+        matched_context_trigger = [t for t in require_context_terms if t in term_lower]
+        if matched_context_trigger and not any(sig in term_lower for sig in context_signal_terms):
+            candidates.append({
+                **row,
+                "reasons": [
+                    f"Özel gereksinim/engellilik bağlamı eksik: {', '.join(matched_context_trigger)}"
+                ],
+            })
+            continue
 
         if any(season in term_lower for season in seasonal_terms):
             continue  # donemsel/sezonsal arama - gercek hizmet arayisi olabilir, pozitif kabul edilir

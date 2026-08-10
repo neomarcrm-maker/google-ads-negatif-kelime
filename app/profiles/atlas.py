@@ -69,14 +69,43 @@ OTHER_MAJOR_CITIES = [
 COMPETITOR_NAMES: list[str] = []
 
 # Dönemsel/sezonsal terimler - gerçek bir hizmet arayışı olabilir,
-# ASLA negatif işaretlenmez.
+# ASLA negatif işaretlenmez. "yaz okulu" burada YOK - REQUIRE_CONTEXT_TERMS
+# altında, çünkü engellilik bağlamı olmadan sıradan bir yaz okulu arayışı
+# olabilir (bkz. aşağıda).
 SEASONAL_TERMS = [
-    "yaz okulu", "yaz kampı", "kış kampı", "yarıyıl kampı",
+    "yaz kampı", "kış kampı", "yarıyıl kampı",
     "sezonluk", "yaz dönemi", "kış dönemi", "yaz etkinliği",
 ]
 
 # Genel (base) junk kelimelere ek olarak bu hesaba özel eklenen kelimeler.
-EXTRA_JUNK_TERMS = {"belediye"}
+# "sosyal hizmet" / "sağlık bakanlığı" - ücretsiz devlet kurumu hizmeti
+# arayanlar, Atlas özel (ücretli) bir merkezdir.
+EXTRA_JUNK_TERMS = {"belediye", "sosyal hizmet", "sağlık bakanlığı"}
+
+# Bu kelimelerden biri aramada geçiyorsa VE aşağıdaki CONTEXT_SIGNAL_TERMS
+# listesinden hiçbiri geçmiyorsa, arama negatif aday sayılır. Atlas özel
+# gereksinimli (otizm, DEHB, down sendromu vb.) çocuklara yönelik bir spor
+# eğitim merkezidir - bu yüzden "jimnastik kursu", "spor akademisi" gibi
+# sıradan/genel spor aramaları, içinde bir engellilik/özel gereksinim ifadesi
+# geçmiyorsa muhtemelen sıradan (özel gereksinimi olmayan) bir arayıştır.
+# Not: "yüzme" burada değil - Atlas hiçbir bağlamda yüzme sunmuyor, bu yüzden
+# NOT_OFFERED_ACTIVITIES'te koşulsuz negatif olarak kalıyor.
+REQUIRE_CONTEXT_TERMS = [
+    "tenis", "jimnastik", "cimnastik", "futbol", "basketbol",
+    "bisiklet", "paten", "kickbox", "kick box",
+    "spor akademisi", "spor salonu", "spor alanı",
+    "çocuk sporu", "çocuklar için spor", "çocuk etkinlikleri",
+    "yaz okulu",
+]
+
+# REQUIRE_CONTEXT_TERMS'teki bir kelime bunlardan biriyle birlikte geçerse
+# gerçek bir özel gereksinim hizmeti arayışı sayılır, negatif işaretlenmez.
+CONTEXT_SIGNAL_TERMS = [
+    "otizm", "otistik", "engelli", "engel", "dehb", "down sendromu",
+    "down sendromlu", "gelişim geriliği", "gelişimsel gerilik",
+    "özel gereksinim", "kaynaştırma", "spektrum", "asperger",
+    "özel eğitim", "psikomotor",
+]
 
 # Hedeflenen minimum yaş. Bunun altındaki bir yaş/ay geçen aramalar
 # negatif aday olarak işaretlenir. Yaş kısıtı olmayan hesaplarda None yapılır.
