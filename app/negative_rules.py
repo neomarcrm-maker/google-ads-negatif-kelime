@@ -6,6 +6,43 @@
 
 import re
 
+_TERM_PATTERN_CACHE: dict[str, re.Pattern] = {}
+_PREFIX_PATTERN_CACHE: dict[str, re.Pattern] = {}
+
+
+def _compile_term(term: str) -> re.Pattern:
+    pattern = _TERM_PATTERN_CACHE.get(term)
+    if pattern is None:
+        pattern = re.compile(r"\b" + re.escape(term) + r"\b")
+        _TERM_PATTERN_CACHE[term] = pattern
+    return pattern
+
+
+def _compile_prefix(term: str) -> re.Pattern:
+    pattern = _PREFIX_PATTERN_CACHE.get(term)
+    if pattern is None:
+        pattern = re.compile(r"\b" + re.escape(term))
+        _PREFIX_PATTERN_CACHE[term] = pattern
+    return pattern
+
+
+def _matches(term: str, text: str) -> bool:
+    """Düz substring yerine kelime sınırına duyarlı (tam kelime/öbek) eşleşme.
+    Örn. "ağda" terimi artık "yağdan" içinde, "kurs" terimi "kursu"
+    içinde, "indir" terimi "indirim" içinde yanlışlıkla eşleşmez.
+    """
+    return bool(_compile_term(term).search(text))
+
+
+def _matches_prefix(term: str, text: str) -> bool:
+    """Sadece sol kelime sınırını zorunlu kılar, sağdan Türkçe ek almasına
+    izin verir (örn. "otizm" kökü "otizmli" içinde de eşleşsin - context
+    sinyali kökle birlikte gelen eklerle de tanınmalı). _matches'in aksine
+    "yağdan" gibi kelime İÇİNDE gömülü olmayan ama kök+ek yapısında olan
+    terimler için kullanılır (bkz. CONTEXT_SIGNAL_TERMS)."""
+    return bool(_compile_prefix(term).search(text))
+
+
 BASE_JUNK_TERMS = {
     "ücretsiz", "bedava", "iş ilanı", "iş ilanları", "indir", "download",
     "nasıl yapılır", "nasıl kullanılır", "youtube", "resim", "görsel",
@@ -58,18 +95,18 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
     for row in search_terms:
         term_lower = row["search_term"].lower()
 
-        if any(name in term_lower for name in business_name_variants):
+        if any(_matches(name, term_lower) for name in business_name_variants):
             continue  # marka adı geçen arama - her zaman pozitif kabul edilir, diğer kontroller atlanır
 
-        if any(comp in term_lower for comp in competitor_names):
+        if any(_matches(comp, term_lower) for comp in competitor_names):
             continue  # rakip marka araması - marka karşılaştırma trafiği, pozitif kabul edilir
 
         # Bazı kelimeler tek başına çok genel/belirsizdir ve sadece profilde
         # tanımlı bir "bağlam sinyali" (örn. engellilik ifadesi) eşlik ederse
         # gerçek bir hizmet arayışı sayılır. Sinyal yoksa diğer tüm muafiyet
         # kontrollerinden (sezonsal, satış vb.) önce doğrudan negatif adaydır.
-        matched_context_trigger = [t for t in require_context_terms if t in term_lower]
-        if matched_context_trigger and not any(sig in term_lower for sig in context_signal_terms):
+        matched_context_trigger = [t for t in require_context_terms if _matches(t, term_lower)]
+        if matched_context_trigger and not any(_matches_prefix(sig, term_lower) for sig in context_signal_terms):
             candidates.append({
                 **row,
                 "reasons": [
@@ -78,27 +115,27 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
             })
             continue
 
-        if any(season in term_lower for season in seasonal_terms):
+        if any(_matches(season, term_lower) for season in seasonal_terms):
             continue  # donemsel/sezonsal arama - gercek hizmet arayisi olabilir, pozitif kabul edilir
 
-        if any(sale in term_lower for sale in sales_terms):
+        if any(_matches(sale, term_lower) for sale in sales_terms):
             continue  # satis firsati araması - gercek hizmet arayisi, pozitif kabul edilir
 
         reasons = []
 
-        matched_junk = [j for j in junk_terms if j in term_lower]
+        matched_junk = [j for j in junk_terms if _matches(j, term_lower)]
         if matched_junk:
             reasons.append(f"Alakasız kelime eşleşmesi: {', '.join(matched_junk)}")
 
-        matched_activity = [a for a in not_offered_activities if a in term_lower]
+        matched_activity = [a for a in not_offered_activities if _matches(a, term_lower)]
         if matched_activity:
             reasons.append(
                 f"Sunulmayan hizmet/branş: {', '.join(matched_activity)}"
             )
 
-        mentions_service_location = any(loc in term_lower for loc in service_locations)
+        mentions_service_location = any(_matches(loc, term_lower) for loc in service_locations)
         if not mentions_service_location:
-            matched_city = [c for c in other_major_cities if c in term_lower]
+            matched_city = [c for c in other_major_cities if _matches(c, term_lower)]
             if matched_city:
                 reasons.append(f"Hizmet bölgesi dışı şehir: {', '.join(matched_city)}")
 
