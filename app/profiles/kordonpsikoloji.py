@@ -10,6 +10,10 @@ BUSINESS_NAME_VARIANTS = [
     "kordon psikoloji merkezi",
     "kordon rehberlik",
     "özel kordon rehberlik",
+    # Merkezin kendi uzmanları - isimleri geçen aramalar kendi markasına
+    # aittir, negatif işaretlenmemeli.
+    "nilay aykutlu",
+    "didem hicran ersan",
 ]
 
 # Sundukları hizmetler (bilgi amaçlı)
@@ -17,11 +21,7 @@ OFFERED_PROGRAMS = [
     "bireysel danışmanlık",
     "çift danışmanlığı",
     "aile danışmanlığı",
-    "çocuk ve ergen danışmanlığı",
     "online psikolojik danışmanlık",
-    "oyun terapisi",
-    "kurumsal danışmanlık",
-    "psikolojik testler",
 ]
 
 # Hizmet bölgesi - İzmir merkez ilçeleri. Bu ilçeler geçen aramalar
@@ -30,8 +30,7 @@ OFFERED_PROGRAMS = [
 # tutuluyor (kullanıcı tercihi) - bu yüzden diğer şehir aramaları yine de
 # negatif aday sayılır (bkz. OTHER_MAJOR_CITIES).
 SERVICE_LOCATIONS = [
-    "izmir", "balçova", "konak", "bornova", "buca", "karşıyaka",
-    "kemalpaşa", "bayraklı", "çiğli", "karabağlar", "gaziemir", "narlıdere",
+    "izmir", "balçova", "konak", "buca", "urla", "karabağlar", "gaziemir", "çeşme","güzelbahçe","narlıdere"
 ]
 
 # Sunulmadığı bilinen, sıkça karıştırılabilecek meslek/hizmet dalları.
@@ -61,6 +60,10 @@ COMPETITOR_NAMES: list[str] = []
 EXTRA_JUNK_TERMS = {
     "psikoloji bölümü", "psikoloji taban puan", "psikoloji taban puanları",
     "psikolog nasıl olunur", "psikoloji lisans", "psikoloji yüksek lisans",
+    # Bilinçli iş kararı: bu hizmetler sitede sunulsa da reklam bütçesi
+    # başka hizmetlere ayrıldığı için artık hedeflenmiyor.
+    "grup terapisi", "oyun terapi", "oyun terapisi", "ergen",
+    "hastane",
 }
 
 # Yaş kısıtı bu hesap için geçerli değil - çocuk, ergen ve yetişkin
