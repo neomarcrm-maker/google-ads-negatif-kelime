@@ -1,4 +1,6 @@
 import os
+import re
+from collections import defaultdict
 from functools import lru_cache
 
 from google.ads.googleads.client import GoogleAdsClient
@@ -11,6 +13,8 @@ DATE_RANGE_ENUMS = {
     "THIS_MONTH",
     "LAST_MONTH",
 }
+
+_ISO_DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 @lru_cache(maxsize=1)
@@ -61,9 +65,28 @@ def list_accounts() -> list[dict]:
     return accounts
 
 
-def fetch_search_terms(customer_id: str, date_range: str = "LAST_30_DAYS") -> list[dict]:
+def _build_date_filter(date_range: str, start_date: str | None, end_date: str | None) -> str:
+    if date_range == "CUSTOM":
+        if not start_date or not end_date:
+            raise ValueError("Özel aralık için start_date ve end_date gerekli")
+        if not _ISO_DATE_PATTERN.match(start_date) or not _ISO_DATE_PATTERN.match(end_date):
+            raise ValueError("Tarihler YYYY-MM-DD formatında olmalı")
+        if start_date > end_date:
+            raise ValueError("Başlangıç tarihi bitiş tarihinden sonra olamaz")
+        return f"segments.date BETWEEN '{start_date}' AND '{end_date}'"
+
     if date_range not in DATE_RANGE_ENUMS:
         raise ValueError(f"Geçersiz date_range: {date_range}")
+    return f"segments.date DURING {date_range}"
+
+
+def fetch_search_terms(
+    customer_id: str,
+    date_range: str = "LAST_30_DAYS",
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> list[dict]:
+    date_filter = _build_date_filter(date_range, start_date, end_date)
 
     client = get_client()
     customer_id = _customer_id(customer_id)
@@ -81,7 +104,7 @@ def fetch_search_terms(customer_id: str, date_range: str = "LAST_30_DAYS") -> li
           metrics.cost_micros,
           metrics.conversions
         FROM search_term_view
-        WHERE segments.date DURING {date_range}
+        WHERE {date_filter}
         ORDER BY metrics.clicks DESC
     """
 
@@ -106,6 +129,45 @@ def fetch_search_terms(customer_id: str, date_range: str = "LAST_30_DAYS") -> li
         raise RuntimeError(_format_ads_exception(ex)) from ex
 
     return rows
+
+
+def fetch_existing_negative_keywords(customer_id: str) -> dict:
+    """Hesapta zaten var olan (kampanya ve ad group seviyesindeki) negatif
+    anahtar kelimeleri döner. Aynı terimin tekrar tekrar negatife eklenmeye
+    çalışılmasını önlemek için find_candidates sonuçlarını elemekte kullanılır.
+    Returns: {"by_campaign": {campaign_id: {text_lower, ...}}, "by_ad_group": {ad_group_id: {text_lower, ...}}}
+    """
+    client = get_client()
+    customer_id = _customer_id(customer_id)
+    ga_service = client.get_service("GoogleAdsService")
+
+    by_campaign: dict[str, set] = defaultdict(set)
+    campaign_query = """
+        SELECT campaign.id, campaign_criterion.keyword.text
+        FROM campaign_criterion
+        WHERE campaign_criterion.negative = true
+          AND campaign_criterion.type = KEYWORD
+    """
+    try:
+        for row in ga_service.search(customer_id=customer_id, query=campaign_query):
+            by_campaign[str(row.campaign.id)].add(row.campaign_criterion.keyword.text.lower())
+    except GoogleAdsException as ex:
+        raise RuntimeError(_format_ads_exception(ex)) from ex
+
+    by_ad_group: dict[str, set] = defaultdict(set)
+    ad_group_query = """
+        SELECT ad_group.id, ad_group_criterion.keyword.text
+        FROM ad_group_criterion
+        WHERE ad_group_criterion.negative = true
+          AND ad_group_criterion.type = KEYWORD
+    """
+    try:
+        for row in ga_service.search(customer_id=customer_id, query=ad_group_query):
+            by_ad_group[str(row.ad_group.id)].add(row.ad_group_criterion.keyword.text.lower())
+    except GoogleAdsException as ex:
+        raise RuntimeError(_format_ads_exception(ex)) from ex
+
+    return {"by_campaign": by_campaign, "by_ad_group": by_ad_group}
 
 
 def _format_ads_exception(ex: GoogleAdsException) -> str:

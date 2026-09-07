@@ -1,5 +1,8 @@
 const accountSelect = document.getElementById("account");
 const dateRangeSelect = document.getElementById("date-range");
+const customDateFields = document.getElementById("custom-date-fields");
+const startDateInput = document.getElementById("start-date");
+const endDateInput = document.getElementById("end-date");
 const analyzeBtn = document.getElementById("analyze-btn");
 const applyBtn = document.getElementById("apply-btn");
 const statusEl = document.getElementById("status");
@@ -7,8 +10,76 @@ const resultsSection = document.getElementById("results");
 const resultsBody = document.getElementById("results-body");
 const resultsSummary = document.getElementById("results-summary");
 const selectAllCheckbox = document.getElementById("select-all");
+const lastCheckedSection = document.getElementById("last-checked");
+const lastCheckedText = document.getElementById("last-checked-text");
+const sinceLastCheckedBtn = document.getElementById("since-last-checked-btn");
 
 let currentCandidates = [];
+
+function lastCheckedKey(customerId) {
+  return `lastChecked:${customerId}`;
+}
+
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getLastChecked(customerId) {
+  try {
+    return localStorage.getItem(lastCheckedKey(customerId));
+  } catch {
+    return null;
+  }
+}
+
+function setLastChecked(customerId, isoDate) {
+  try {
+    localStorage.setItem(lastCheckedKey(customerId), isoDate);
+  } catch {
+    // localStorage yoksa (gizli sekme vb.) sessizce yok say
+  }
+}
+
+function daysAgo(isoDate) {
+  const diffMs = new Date(todayIso()) - new Date(isoDate);
+  return Math.round(diffMs / 86400000);
+}
+
+function refreshLastCheckedInfo() {
+  const customerId = accountSelect.value;
+  if (!customerId) {
+    lastCheckedSection.hidden = true;
+    return;
+  }
+  const lastChecked = getLastChecked(customerId);
+  lastCheckedSection.hidden = false;
+  if (!lastChecked) {
+    lastCheckedText.textContent = "Bu hesap için henüz kontrol kaydı yok.";
+    sinceLastCheckedBtn.disabled = true;
+  } else {
+    const n = daysAgo(lastChecked);
+    const label = n <= 0 ? "bugün" : n === 1 ? "1 gün önce" : `${n} gün önce`;
+    lastCheckedText.textContent = `Son kontrol: ${label} (${lastChecked})`;
+    sinceLastCheckedBtn.disabled = false;
+  }
+}
+
+function updateCustomDateVisibility() {
+  customDateFields.hidden = dateRangeSelect.value !== "CUSTOM";
+}
+
+dateRangeSelect.addEventListener("change", updateCustomDateVisibility);
+accountSelect.addEventListener("change", refreshLastCheckedInfo);
+
+sinceLastCheckedBtn.addEventListener("click", () => {
+  const customerId = accountSelect.value;
+  const lastChecked = getLastChecked(customerId);
+  if (!lastChecked) return;
+  dateRangeSelect.value = "CUSTOM";
+  updateCustomDateVisibility();
+  startDateInput.value = lastChecked;
+  endDateInput.value = todayIso();
+});
 
 function setStatus(msg, isError = false) {
   statusEl.textContent = msg;
@@ -25,6 +96,7 @@ async function loadAccounts() {
       .map((a) => `<option value="${a.id}">${a.name} (${a.id})</option>`)
       .join("");
     setStatus(`${data.accounts.length} hesap bulundu.`);
+    refreshLastCheckedInfo();
   } catch (err) {
     setStatus(`Hesaplar yüklenemedi: ${err.message}`, true);
   }
@@ -72,6 +144,17 @@ analyzeBtn.addEventListener("click", async () => {
     setStatus("Önce bir hesap seç.", true);
     return;
   }
+
+  const body = { customer_id: customerId, date_range: dateRangeSelect.value };
+  if (dateRangeSelect.value === "CUSTOM") {
+    if (!startDateInput.value || !endDateInput.value) {
+      setStatus("Özel aralık için başlangıç ve bitiş tarihi seç.", true);
+      return;
+    }
+    body.start_date = startDateInput.value;
+    body.end_date = endDateInput.value;
+  }
+
   analyzeBtn.disabled = true;
   setStatus("Arama terimleri analiz ediliyor, bu biraz sürebilir...");
   resultsSection.hidden = true;
@@ -79,19 +162,21 @@ analyzeBtn.addEventListener("click", async () => {
     const res = await fetch("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        customer_id: customerId,
-        date_range: dateRangeSelect.value,
-      }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
     const profileNote = data.profile_used
       ? `Profil: ${data.profile_used}`
       : "Bu hesap için özel profil tanımlı değil, sadece genel kurallar uygulandı.";
-    resultsSummary.textContent = `${data.total_terms} toplam arama teriminden ${data.candidates.length} negatif aday bulundu. ${profileNote}`;
+    const alreadyNegativeNote = data.already_negative_count
+      ? ` (${data.already_negative_count} terim zaten negatif eklenmişti, tekrar önerilmedi.)`
+      : "";
+    resultsSummary.textContent = `${data.total_terms} toplam arama teriminden ${data.candidates.length} negatif aday bulundu. ${profileNote}${alreadyNegativeNote}`;
     renderCandidates(data.candidates);
     setStatus("Analiz tamamlandı.");
+    setLastChecked(customerId, todayIso());
+    refreshLastCheckedInfo();
   } catch (err) {
     setStatus(`Analiz başarısız: ${err.message}`, true);
   } finally {

@@ -147,3 +147,28 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
             candidates.append({**row, "reasons": reasons})
 
     return candidates
+
+
+def filter_already_negative(candidates: list[dict], existing_negatives: dict) -> tuple[list[dict], int]:
+    """Hesapta kampanya veya ad group seviyesinde zaten negatif olarak
+    eklenmiş terimleri aday listesinden eler. Aynı kelimenin aynı hesaba
+    tekrar tekrar negatif olarak eklenmeye çalışılmasını önler.
+    Returns: (filtered_candidates, elenen_sayisi)
+    """
+    by_campaign = existing_negatives.get("by_campaign", {})
+    by_ad_group = existing_negatives.get("by_ad_group", {})
+
+    filtered = []
+    skipped = 0
+    for c in candidates:
+        term_lower = c["search_term"].lower()
+        already_negative = (
+            term_lower in by_campaign.get(c["campaign_id"], ())
+            or term_lower in by_ad_group.get(c["ad_group_id"], ())
+        )
+        if already_negative:
+            skipped += 1
+            continue
+        filtered.append(c)
+
+    return filtered, skipped

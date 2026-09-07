@@ -25,10 +25,24 @@
           <option value="LAST_30_DAYS" selected>Son 30 gün</option>
           <option value="THIS_MONTH">Bu ay</option>
           <option value="LAST_MONTH">Geçen ay</option>
+          <option value="CUSTOM">Özel aralık</option>
         </select>
       </div>
 
+      <div class="field" id="custom-date-fields" hidden>
+        <label for="start-date">Başlangıç - Bitiş</label>
+        <div class="date-inputs">
+          <input type="date" id="start-date" />
+          <input type="date" id="end-date" />
+        </div>
+      </div>
+
       <button id="analyze-btn">Analiz Et</button>
+    </section>
+
+    <section class="last-checked" id="last-checked" hidden>
+      <span id="last-checked-text"></span>
+      <button id="since-last-checked-btn" type="button">Son kontrolden bugüne</button>
     </section>
 
     <section id="status" class="status"></section>

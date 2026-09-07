@@ -8,8 +8,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
-from app.ads_client import list_accounts, fetch_search_terms
-from app.negative_rules import find_candidates
+from app.ads_client import list_accounts, fetch_search_terms, fetch_existing_negative_keywords
+from app.negative_rules import find_candidates, filter_already_negative
 from app.mutate import add_negative_keywords
 from app.profiles.registry import get_profile
 
@@ -37,6 +37,8 @@ def require_auth(credentials: HTTPBasicCredentials = Depends(security)):
 class AnalyzeRequest(BaseModel):
     customer_id: str
     date_range: str = "LAST_30_DAYS"
+    start_date: str | None = None
+    end_date: str | None = None
 
 
 class NegativeTerm(BaseModel):
@@ -66,15 +68,27 @@ def api_accounts(_auth: bool = Depends(require_auth)):
 @app.post("/api/analyze")
 def api_analyze(body: AnalyzeRequest, _auth: bool = Depends(require_auth)):
     try:
-        search_terms = fetch_search_terms(body.customer_id, body.date_range)
+        search_terms = fetch_search_terms(
+            body.customer_id, body.date_range, body.start_date, body.end_date
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(500, str(exc)) from exc
 
     profile = get_profile(body.customer_id)
     candidates = find_candidates(search_terms, profile=profile)
+
+    try:
+        existing_negatives = fetch_existing_negative_keywords(body.customer_id)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(500, str(exc)) from exc
+    candidates, already_negative_count = filter_already_negative(candidates, existing_negatives)
+
     return {
         "total_terms": len(search_terms),
         "candidates": candidates,
+        "already_negative_count": already_negative_count,
         "profile_used": getattr(profile, "DISPLAY_NAME", None),
     }
 

@@ -83,6 +83,25 @@ button:disabled {
   margin-bottom: 1rem;
 }
 
+.date-inputs {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.last-checked {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.last-checked button {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+}
+
 .results-header {
   display: flex;
   justify-content: space-between;
