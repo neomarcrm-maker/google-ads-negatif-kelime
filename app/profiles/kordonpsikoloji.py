@@ -39,6 +39,11 @@ SERVICE_LOCATIONS = [
 # hizmet arıyordur.
 NOT_OFFERED_ACTIVITIES = [
     "psikiyatrist", "psikiyatri", "ilaç tedavisi", "reçete", "ilaç yazan",
+    # Bilinçli iş kararı: bu hesap artık psikolojik test ve kurumsal
+    # danışmanlık hizmetlerini hedeflemiyor.
+    "test", "testi", "testler", "testleri",
+    "psikolojik test", "psikolojik testi", "psikolojik testler", "psikolojik testleri",
+    "kurumsal danışmanlık", "kurum danışmanlığı",
 ]
 
 # Büyük şehirler (İzmir hariç) - il/ilçe belirten aramalarda hizmet
@@ -54,6 +59,28 @@ OTHER_MAJOR_CITIES = [
 # İsimler öğrenildikçe buraya eklenecek.
 COMPETITOR_NAMES: list[str] = []
 
+# COMPETITOR_NAMES'in TERSİ: burada geçen bir isim, Kordon'un kendi
+# uzmanları (Nilay Aykutlu, Didem Hicran Ersan) DIŞINDA farklı bir
+# psikolog/psikoloji merkezi arandığı anlamına gelir - her zaman negatif
+# aday sayılır. Aşağıdaki isimler İzmir merkez ilçelerinde (Balçova, Konak,
+# Karşıyaka, Bornova, Buca, Bayraklı, Çiğli, Karabağlar, Gaziemir, Narlıdere)
+# web araştırmasıyla bulunan gerçek rakip psikoloji merkezi/psikolog
+# isimleridir. Bilinçli olarak "<ilçe> psikolog" gibi jenerik/markasız arama
+# kalıbıyla aynı görünen isimler (örn. "bornova psikolog", "çiğli psikolog")
+# DAHİL EDİLMEDİ - bunlar gerçek marka aramasından ayırt edilemez. Randevu
+# dizin siteleri (DoktorTakvimi, Doktorsitesi vb.) de rakip değil, hariç.
+OTHER_PROVIDER_NAMES: list[str] = [
+    "anka psikoloji", "ekol tıp merkezi", "lotus psikoterapi",
+    "etka psikoloji", "konak psikoloji merkezi",
+    "diyalog psikoloji", "değişim psikoloji", "aybros psikoloji",
+    "eka psikoloji", "pilea psikoloji", "haziran psikoloji",
+    "ida psikoloji", "hipath psikoloji", "psikosentez", "idil rehberlik",
+    "dese psikoloji", "kağan ay", "şans psikoloji",
+    "burcu budak", "sofist psikoloji", "altuğ psikoloji",
+    "enki psikolojik danışmanlık", "narlıdere yaşam merkezi",
+    "yaşam psikoloji", "sarı psikoloji", "cemre özcan", "metehan aykut",
+]
+
 # Genel (base) junk kelimelere ek olarak bu hesaba özel eklenen kelimeler.
 # Psikoloji bölümünü araştıran öğrenci/kariyer arayışları - danışmanlık
 # hizmeti arayışı değildir.
@@ -64,6 +91,11 @@ EXTRA_JUNK_TERMS = {
     # başka hizmetlere ayrıldığı için artık hedeflenmiyor.
     "grup terapisi", "oyun terapi", "oyun terapisi", "ergen",
     "hastane",
+    # Belediyelerin sunduğu ÜCRETSİZ psikolojik danışmanlık hizmeti - Kordon
+    # özel (ücretli) bir merkezdir, bu yüzden hedef kitle değildir.
+    # SERVICE_LOCATIONS'daki her ilçe için otomatik türetilir.
+    *{f"{loc} belediyesi" for loc in SERVICE_LOCATIONS},
+    "belediye", "ücretsiz psikolojik danışmanlık", "izsem",
 }
 
 # Yaş kısıtı bu hesap için geçerli değil - çocuk, ergen ve yetişkin

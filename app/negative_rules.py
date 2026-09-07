@@ -81,6 +81,7 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
         BASE_JUNK_TERMS - set(getattr(profile, "JUNK_TERM_EXCEPTIONS", []))
     ) | set(getattr(profile, "EXTRA_JUNK_TERMS", []))
     competitor_names = getattr(profile, "COMPETITOR_NAMES", [])
+    other_provider_names = getattr(profile, "OTHER_PROVIDER_NAMES", [])
     seasonal_terms = getattr(profile, "SEASONAL_TERMS", [])
     sales_terms = getattr(profile, "SALES_TERMS", [])
     not_offered_activities = getattr(profile, "NOT_OFFERED_ACTIVITIES", [])
@@ -100,6 +101,19 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
 
         if any(_matches(comp, term_lower) for comp in competitor_names):
             continue  # rakip marka araması - marka karşılaştırma trafiği, pozitif kabul edilir
+
+        # COMPETITOR_NAMES'in tam tersi: burada listelenen bir isim geçiyorsa
+        # (rakip bir uzman/kurum vb.) marka karşılaştırması değil, doğrudan
+        # başka bir sağlayıcı aranıyor demektir - her zaman negatif adaydır.
+        matched_other_provider = [n for n in other_provider_names if _matches(n, term_lower)]
+        if matched_other_provider:
+            candidates.append({
+                **row,
+                "reasons": [
+                    f"Farklı sağlayıcı/kurum ismi araması: {', '.join(matched_other_provider)}"
+                ],
+            })
+            continue
 
         # Bazı kelimeler tek başına çok genel/belirsizdir ve sadece profilde
         # tanımlı bir "bağlam sinyali" (örn. engellilik ifadesi) eşlik ederse
