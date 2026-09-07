@@ -5,10 +5,9 @@
 #
 # Not: Bu hesap diğer profillerden (Atlas, İSBAY, Çimenci, Slimworld) farklı
 # bir iş modeline sahip - yerel bir hizmet işletmesi DEĞİL, İzmir Ayrancılar'da
-# üretim yapan ve 100+ bayi ile Türkiye geneline sevkiyat yapan bir polietilen
-# boru ÜRETİCİSİ/toptancısıdır. Bu yüzden SERVICE_LOCATIONS / OTHER_MAJOR_CITIES
-# mekanizması burada KULLANILMIYOR - başka şehirden gelen aramalar alakasız
-# sayılmaz (nationwide sevkiyat yapıyorlar).
+# üretim yapan bir polietilen boru ÜRETİCİSİ/toptancısıdır. Fiilen sadece
+# belirli bir bölgede (Ege + yakın çevre illeri) faaliyet gösteriyor - bkz.
+# SERVICE_LOCATIONS.
 
 DISPLAY_NAME = "Deka Boru"
 
@@ -32,6 +31,20 @@ OFFERED_PROGRAMS = [
     "pvc-u borular ve ek parçaları",
 ]
 
+# Hizmet/faaliyet bölgesi illeri. Bu iller geçen aramalar "hizmet bölgesi
+# dışı şehir" olarak asla işaretlenmez, pozitif kabul edilir.
+SERVICE_LOCATIONS = [
+    "izmir", "manisa", "aydın", "denizli", "antalya", "muğla",
+    "uşak", "çanakkale", "balıkesir", "bursa",
+]
+
+# Büyük şehirler (yukarıdaki hizmet bölgesi illeri hariç) - il belirten
+# aramalarda hizmet bölgesi dışı olabileceğini işaretlemek için kullanılır.
+OTHER_MAJOR_CITIES = [
+    "istanbul", "ankara", "adana", "konya", "gaziantep",
+    "mersin", "kayseri", "eskişehir", "samsun",
+]
+
 # Sadece polietilen/PVC (plastik) boru üretiyorlar. Farklı bir malzeme
 # arayan trafiği yakalamak için eklendi - bu ürünleri Deka Boru üretmiyor.
 NOT_OFFERED_ACTIVITIES = [
@@ -42,6 +55,8 @@ NOT_OFFERED_ACTIVITIES = [
     # satın alma arayışı değildir.
     "tesisatçı", "sıhhi tesisatçı", "boru tamiri", "boru patlağı",
     "acil tesisatçı", "gider açma", "tıkanıklık açma",
+    # Molecor - farklı bir marka (rakip) arayışı, Deka Boru ürünü değil.
+    "molecor",
 ]
 
 # Rakip firma isimleri - bu isimleri arayıp bizim reklamımıza tıklayanlar
@@ -67,6 +82,15 @@ EXTRA_JUNK_TERMS = {
     "yapı market", "yapı marketi",
     "tek adet", "1 adet", "adet fiyatı",
     "en yakın", "yakınımda", "mağaza", "mağazası",
+    # "ikinci el" base kuralda zaten var - bunlar onun ek yazım türevleri.
+    "2. el", "2 el",
+    # İşin/malzemenin nasıl yapılacağına/döşeneceğine dair aramalar (örn.
+    # "drenaj borusu döşeme") kendin-yap/bilgi arayışıdır, ürün satın alma
+    # niyeti değildir - Deka Boru bir üretici/toptancıdır, uygulama rehberi
+    # sunmaz.
+    "döşeme", "döşenir", "döşenmesi", "nasıl döşenir",
+    "montajı nasıl yapılır", "nasıl monte edilir", "nasıl bağlanır",
+    "kendin yap",
 }
 
 # Yaş kısıtı bu hesap için geçerli değil (B2B/endüstriyel ürün satışı).
