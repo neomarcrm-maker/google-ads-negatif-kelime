@@ -36,7 +36,7 @@ OFFERED_PROGRAMS = [
 # arayan trafiği yakalamak için eklendi - bu ürünleri Deka Boru üretmiyor.
 NOT_OFFERED_ACTIVITIES = [
     "çelik boru", "demir boru", "metal boru", "bakır boru",
-    "paslanmaz çelik boru", "galvaniz boru", "dökme demir boru",
+    "paslanmaz çelik boru", "dökme demir boru",
     # Deka Boru bir üretici/toptancıdır, tesisatçılık SERVİSİ vermez.
     # "tesisatçı çağır" gibi aramalar arızi bir servis talebidir, ürün
     # satın alma arayışı değildir.
@@ -49,6 +49,12 @@ NOT_OFFERED_ACTIVITIES = [
 # İsimler öğrenildikçe buraya eklenecek.
 COMPETITOR_NAMES: list[str] = []
 
+# "sahibinden" genel (base) junk kelime listesinde olsa da Deka Boru için
+# istisna - bu hesapta negatif sayılmasın. "ikinci el"/"second hand" ise
+# base listede kalmaya devam ediyor (istisna değil), o yüzden bu terimler
+# ve türevleri yine negatif aday sayılır.
+JUNK_TERM_EXCEPTIONS = {"sahibinden"}
+
 # EN ÖNEMLİ HEDEF: Deka Boru sadece palet/kamyon/tır bazında toptan satış
 # yapıyor (minimum sipariş miktarı var). Hırdavatçı, nalbur, bayilerin
 # perakende mağazasını arayan küçük/tekil müşteriler bu hesabın reklamını
@@ -60,7 +66,6 @@ EXTRA_JUNK_TERMS = {
     "perakende", "parekende",
     "yapı market", "yapı marketi",
     "tek adet", "1 adet", "adet fiyatı",
-    "metre fiyatı", "metre fiyat",
     "en yakın", "yakınımda", "mağaza", "mağazası",
 }
 
