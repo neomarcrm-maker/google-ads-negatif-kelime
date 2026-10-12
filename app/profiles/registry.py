@@ -15,6 +15,7 @@ PROFILE_MAP: dict[str, str] = {
     "7963745395": "cimenci",
     "8529228844": "kordonpsikoloji",
     "4799430595": "dekaboru",
+    "2323418231": "slimworld_zekeriyakoy",
 }
 
 
