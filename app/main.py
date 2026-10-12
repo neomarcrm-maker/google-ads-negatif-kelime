@@ -9,7 +9,8 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from app.ads_client import list_accounts, fetch_search_terms, fetch_existing_negative_keywords
-from app.negative_rules import find_candidates, filter_already_negative
+from app.ai_review import review_rows
+from app.negative_rules import find_candidates, filter_already_negative, is_exempt_row
 from app.mutate import add_negative_keywords
 from app.profiles.registry import get_profile
 
@@ -83,12 +84,26 @@ def api_analyze(body: AnalyzeRequest, _auth: bool = Depends(require_auth)):
         existing_negatives = fetch_existing_negative_keywords(body.customer_id)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(500, str(exc)) from exc
+
+    # Kurallardan geçen (negatif sayılmayan) satırları, zaten negatif olanlar
+    # ve muaf kampanya/marka aramaları hariç, anlam bazlı AI incelemesine ver.
+    candidate_keys = {(c["campaign_id"], c["ad_group_id"], c["search_term"]) for c in candidates}
+    passed_rows = [
+        r for r in search_terms
+        if (r["campaign_id"], r["ad_group_id"], r["search_term"]) not in candidate_keys
+        and not is_exempt_row(r, profile)
+    ]
+    passed_rows, _ = filter_already_negative(passed_rows, existing_negatives)
+    ai_candidates, ai_review_note = review_rows(passed_rows, profile)
+    candidates = sorted(candidates + ai_candidates, key=lambda c: c["clicks"], reverse=True)
+
     candidates, already_negative_count = filter_already_negative(candidates, existing_negatives)
 
     return {
         "total_terms": len(search_terms),
         "candidates": candidates,
         "already_negative_count": already_negative_count,
+        "ai_review_note": ai_review_note,
         "profile_used": getattr(profile, "DISPLAY_NAME", None),
     }
 

@@ -73,6 +73,20 @@ def _find_age_violation(term_lower: str, min_age_years) -> str | None:
     return None
 
 
+def is_exempt_row(row: dict, profile=None) -> bool:
+    """Hiçbir negatif/AI incelemesine girmemesi gereken satırlar: adı
+    EXEMPT_CAMPAIGN_KEYWORDS'ten birini içeren kampanyalar (örn. Türkiye
+    genelinde bayi arayan franchise kampanyası) ve marka/rakip aramaları.
+    """
+    campaign_name = row.get("campaign_name", "").lower()
+    if any(k in campaign_name for k in getattr(profile, "EXEMPT_CAMPAIGN_KEYWORDS", [])):
+        return True
+    term_lower = row["search_term"].lower()
+    if any(_matches(n, term_lower) for n in getattr(profile, "BUSINESS_NAME_VARIANTS", [])):
+        return True
+    return any(_matches(c, term_lower) for c in getattr(profile, "COMPETITOR_NAMES", []))
+
+
 def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
     """profile: app/profiles/<hesap>.py modülü, ya da None (özel profili
     olmayan hesaplar için - bu durumda sadece BASE_JUNK_TERMS uygulanır).
@@ -92,9 +106,14 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
     context_signal_terms = getattr(profile, "CONTEXT_SIGNAL_TERMS", [])
     business_name_variants = getattr(profile, "BUSINESS_NAME_VARIANTS", [])
 
+    exempt_campaign_keywords = getattr(profile, "EXEMPT_CAMPAIGN_KEYWORDS", [])
+
     candidates = []
     for row in search_terms:
         term_lower = row["search_term"].lower()
+
+        if any(k in row.get("campaign_name", "").lower() for k in exempt_campaign_keywords):
+            continue  # muaf kampanya (örn. bayilik) - hiçbir arama negatif sayılmaz
 
         if any(_matches(name, term_lower) for name in business_name_variants):
             continue  # marka adı geçen arama - her zaman pozitif kabul edilir, diğer kontroller atlanır
