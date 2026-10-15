@@ -81,6 +81,19 @@ sinceLastCheckedBtn.addEventListener("click", () => {
   endDateInput.value = todayIso();
 });
 
+async function readError(res) {
+  const text = await res.text();
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed && parsed.detail) {
+      return typeof parsed.detail === "string" ? parsed.detail : JSON.stringify(parsed.detail);
+    }
+  } catch {
+    // JSON değilse düz metni göster
+  }
+  return text;
+}
+
 function setStatus(msg, isError = false) {
   statusEl.textContent = msg;
   statusEl.style.color = isError ? "#d93025" : "";
@@ -90,7 +103,7 @@ async function loadAccounts() {
   setStatus("Hesaplar yükleniyor...");
   try {
     const res = await fetch("/api/accounts");
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) throw new Error(await readError(res));
     const data = await res.json();
     accountSelect.innerHTML = data.accounts
       .map((a) => `<option value="${a.id}">${a.name} (${a.id})</option>`)
@@ -164,7 +177,7 @@ analyzeBtn.addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) throw new Error(await readError(res));
     const data = await res.json();
     const profileNote = data.profile_used
       ? `Profil: ${data.profile_used}`
@@ -219,7 +232,7 @@ applyBtn.addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ customer_id: customerId, terms, validate_only: true }),
     });
-    if (!validateRes.ok) throw new Error(await validateRes.text());
+    if (!validateRes.ok) throw new Error(await readError(validateRes));
 
     const finalConfirm = window.confirm(
       `Doğrulama başarılı. ${selected.length} negatif anahtar kelime GERÇEK hesaba yazılacak. Bu işlem geri alınabilir ama kampanyanı etkiler. Onaylıyor musun?`
@@ -236,7 +249,7 @@ applyBtn.addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ customer_id: customerId, terms, validate_only: false }),
     });
-    if (!applyRes.ok) throw new Error(await applyRes.text());
+    if (!applyRes.ok) throw new Error(await readError(applyRes));
     const result = await applyRes.json();
     setStatus(`${result.added} negatif anahtar kelime başarıyla eklendi.`);
   } catch (err) {
