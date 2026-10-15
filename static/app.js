@@ -172,7 +172,7 @@ analyzeBtn.addEventListener("click", async () => {
     const alreadyNegativeNote = data.already_negative_count
       ? ` (${data.already_negative_count} terim zaten negatif eklenmişti, tekrar önerilmedi.)`
       : "";
-    const aiNote = data.ai_review_note ? ` ${data.ai_review_note}` : "";
+    const aiNote = [data.ai_review_note, data.negatives_note].filter(Boolean).map((n) => ` ${n}`).join("");
     resultsSummary.textContent = `${data.total_terms} toplam arama teriminden ${data.candidates.length} negatif aday bulundu. ${profileNote}${alreadyNegativeNote}${aiNote}`;
     renderCandidates(data.candidates);
     setStatus("Analiz tamamlandı.");

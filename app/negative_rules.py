@@ -182,26 +182,76 @@ def find_candidates(search_terms: list[dict], profile=None) -> list[dict]:
     return candidates
 
 
+def normalize_text(text: str) -> str:
+    """Negatif/arama terimi karşılaştırması için Türkçe'ye duyarlı normalize.
+    Python'un "İ".lower() sonucu birleşik noktalı 'i̇' üretir ve düz
+    karşılaştırmada "izmir" ile eşleşmez; bu yüzden önce İ/I düzeltilir.
+    Eşleme türü sembolleri ([ ] " +) ve fazla boşluklar da atılır.
+    """
+    text = text.replace("İ", "i").replace("I", "ı").lower()
+    for ch in '[]"+':
+        text = text.replace(ch, "")
+    return " ".join(text.split())
+
+
+def _blocks(entry: tuple, term_norm: str, term_tokens: tuple) -> bool:
+    """Verilen negatif kayıt (norm, kelimeler, eşleme_türü) bu arama terimini
+    Google'da fiilen engeller mi? Negatiflerde yakın varyant eşleşmesi yoktur,
+    kelimeler birebir aranır."""
+    neg_norm, neg_tokens, match_type = entry
+    if not neg_tokens:
+        return False
+    if match_type == "EXACT":
+        return neg_norm == term_norm
+    if match_type == "PHRASE":
+        n = len(neg_tokens)
+        return any(term_tokens[i : i + n] == neg_tokens for i in range(len(term_tokens) - n + 1))
+    return set(neg_tokens) <= set(term_tokens)  # BROAD
+
+
+def _applicable_negatives(row: dict, existing: dict):
+    cid, agid = row["campaign_id"], row["ad_group_id"]
+    yield from existing.get("by_campaign", {}).get(cid, ())
+    yield from existing.get("by_ad_group", {}).get(agid, ())
+    for ssid in existing.get("campaign_shared_sets", {}).get(cid, ()):
+        yield from existing.get("by_shared_set", {}).get(ssid, ())
+    yield from existing.get("account", ())
+
+
 def filter_already_negative(candidates: list[dict], existing_negatives: dict) -> tuple[list[dict], int]:
-    """Hesapta kampanya veya ad group seviyesinde zaten negatif olarak
-    eklenmiş terimleri aday listesinden eler. Aynı kelimenin aynı hesaba
-    tekrar tekrar negatif olarak eklenmeye çalışılmasını önler.
+    """Bu aramayı Google'da zaten engelleyen bir negatif varsa (kampanya, ad
+    group, kampanyaya bağlı paylaşılan liste ya da hesap seviyesinde;
+    EXACT/PHRASE/BROAD eşleme türüne göre) adayı listeden eler. Aynı kelimenin
+    tekrar tekrar negatife eklenmeye çalışılmasını önler.
     Returns: (filtered_candidates, elenen_sayisi)
     """
-    by_campaign = existing_negatives.get("by_campaign", {})
-    by_ad_group = existing_negatives.get("by_ad_group", {})
-
     filtered = []
     skipped = 0
     for c in candidates:
-        term_lower = c["search_term"].lower()
-        already_negative = (
-            term_lower in by_campaign.get(c["campaign_id"], ())
-            or term_lower in by_ad_group.get(c["ad_group_id"], ())
-        )
-        if already_negative:
+        term_norm = normalize_text(c["search_term"])
+        term_tokens = tuple(term_norm.split())
+        if any(_blocks(e, term_norm, term_tokens) for e in _applicable_negatives(c, existing_negatives)):
             skipped += 1
             continue
         filtered.append(c)
-
     return filtered, skipped
+
+
+def annotate_negated_elsewhere(candidates: list[dict], existing_negatives: dict) -> None:
+    """Aday başka bir kampanyada zaten negatifse (bu kampanyada değilse
+    elenmez, çünkü bu kampanyayı korumaz) sebep listesine bunu ekler; böylece
+    aynı kelimenin kampanyalar arası mükerrer eklenmesi bilinçli kararla yapılır.
+    """
+    by_campaign = existing_negatives.get("by_campaign", {})
+    names = existing_negatives.get("campaign_names", {})
+    for c in candidates:
+        term_norm = normalize_text(c["search_term"])
+        term_tokens = tuple(term_norm.split())
+        elsewhere = [
+            names.get(cid, cid)
+            for cid, entries in by_campaign.items()
+            if cid != c["campaign_id"] and any(_blocks(e, term_norm, term_tokens) for e in entries)
+        ]
+        if elsewhere:
+            shown = ", ".join(elsewhere[:3]) + (" ..." if len(elsewhere) > 3 else "")
+            c["reasons"] = [*c["reasons"], f"Başka kampanyada zaten negatif: {shown}"]

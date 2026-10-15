@@ -10,7 +10,12 @@ from pydantic import BaseModel
 
 from app.ads_client import list_accounts, fetch_search_terms, fetch_existing_negative_keywords
 from app.ai_review import review_rows
-from app.negative_rules import find_candidates, filter_already_negative, is_exempt_row
+from app.negative_rules import (
+    annotate_negated_elsewhere,
+    filter_already_negative,
+    find_candidates,
+    is_exempt_row,
+)
 from app.mutate import add_negative_keywords
 from app.profiles.registry import get_profile
 
@@ -98,12 +103,14 @@ def api_analyze(body: AnalyzeRequest, _auth: bool = Depends(require_auth)):
     candidates = sorted(candidates + ai_candidates, key=lambda c: c["clicks"], reverse=True)
 
     candidates, already_negative_count = filter_already_negative(candidates, existing_negatives)
+    annotate_negated_elsewhere(candidates, existing_negatives)
 
     return {
         "total_terms": len(search_terms),
         "candidates": candidates,
         "already_negative_count": already_negative_count,
         "ai_review_note": ai_review_note,
+        "negatives_note": " ".join(existing_negatives.get("notes", [])) or None,
         "profile_used": getattr(profile, "DISPLAY_NAME", None),
     }
 
