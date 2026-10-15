@@ -67,7 +67,9 @@ def review_rows(rows: list[dict], profile) -> tuple[list[dict], str | None]:
     Durum notu None ise katman çalışmadı/gerekmedi (sessiz atlama).
     """
     brief = getattr(profile, "AI_REVIEW_BRIEF", None)
-    if not brief or not rows:
+    if not brief:
+        return [], "AI inceleme yapılmadı: bu hesap için işletme tarifi (AI_REVIEW_BRIEF) tanımlı değil."
+    if not rows:
         return [], None
 
     if not os.environ.get("ANTHROPIC_API_KEY"):

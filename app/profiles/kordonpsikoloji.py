@@ -101,3 +101,14 @@ EXTRA_JUNK_TERMS = {
 # Yaş kısıtı bu hesap için geçerli değil - çocuk, ergen ve yetişkin
 # danışmanlığı birlikte sunuluyor.
 MIN_TARGET_AGE_YEARS = None
+
+# Anlam bazlı AI incelemesi için işletme tarifi (bkz. app/ai_review.py).
+# Kelime kurallarından geçen aramalar bu tarife göre Claude tarafından
+# değerlendirilir; işletmeye uymayan aramalar negatif aday olur. Kararsız
+# kalınan aramalar işaretlenmez. Marka/rakip adı geçen aramalar zaten
+# incelemeye girmez. Tarif yanlış yakalama/kaçırma gördükçe güncellenir.
+AI_REVIEW_BRIEF = """Kordon Psikoloji Merkezi (İzmir Balçova): bireysel danışmanlık, çift ve aile danışmanlığı, online psikolojik danışmanlık veren özel (ücretli) bir psikoloji merkezi. Uzmanları: Nilay Aykutlu, Didem Hicran Ersan. İzmir odaklı hedefleme.
+
+UYGUN (negatif yapma): İzmir ve ilçelerinde psikolog/psikolojik danışman arayışı (markasız genel aramalar dahil: "izmir psikolog", "balçova aile danışmanlığı"), kaygı, stres, ilişki sorunları, çift/aile terapisi, online terapi, fiyat/randevu.
+
+UYGUN DEĞİL (negatif yap): grup terapisi, oyun terapisi, çocuk/ergen odaklı aramalar, psikolojik test, kurumsal danışmanlık; psikiyatrist, ilaç, reçete, hastane; belediyelerin ücretsiz danışmanlık hizmeti; başka bir psikolog ya da psikoloji merkezinin adını arayanlar; psikoloji bölümü/taban puan/lisans gibi öğrenci ve kariyer aramaları; iş ilanı; İzmir dışı şehirler."""

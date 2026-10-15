@@ -95,3 +95,14 @@ EXTRA_JUNK_TERMS = {
 
 # Yaş kısıtı bu hesap için geçerli değil (B2B/endüstriyel ürün satışı).
 MIN_TARGET_AGE_YEARS = None
+
+# Anlam bazlı AI incelemesi için işletme tarifi (bkz. app/ai_review.py).
+# Kelime kurallarından geçen aramalar bu tarife göre Claude tarafından
+# değerlendirilir; işletmeye uymayan aramalar negatif aday olur. Kararsız
+# kalınan aramalar işaretlenmez. Marka/rakip adı geçen aramalar zaten
+# incelemeye girmez. Tarif yanlış yakalama/kaçırma gördükçe güncellenir.
+AI_REVIEW_BRIEF = """Deka Boru ve Ek Parçaları A.Ş. (İzmir Torbalı): polietilen (PE100) ve PVC plastik boru, ek parça, damla sulama, tarımsal sulama/peyzaj boruları, koruge ve drenaj boruları, su depoları, hortum, yağmurlama sistemleri, pis su ve PVC-U boruları üreten TOPTAN satış yapan üretici. Satış palet/kamyon/tır bazında, minimum sipariş miktarı var, bayilik sistemiyle çalışıyor. Faaliyet bölgesi: İzmir, Manisa, Aydın, Denizli, Antalya, Muğla, Uşak, Çanakkale, Balıkesir, Bursa.
+
+UYGUN (negatif yapma): toptan/fabrika/üretici boru ve ek parça arayışı, proje ve altyapı alımları, sulama sistemi ürünleri, fiyat listesi/teklif, bayilik ve bayi olma, bu illerdeki aramalar, sahibinden geçen aramalar.
+
+UYGUN DEĞİL (negatif yap): perakende/küçük miktar alıcıları (hırdavatçı, nalbur, tek adet, metre fiyatı, yapı market, en yakın mağaza); ikinci el / 2. el; çelik, demir, bakır, dökme demir, paslanmaz gibi metal boru arayışları (GALVANİZ boru istisnadır, negatif yapma); tesisatçı, boru tamiri, gider açma gibi servis aramaları; döşeme/montaj nasıl yapılır gibi kendin yap bilgi aramaları; Molecor markası; iş ilanı; faaliyet bölgesi dışındaki büyük şehirler."""

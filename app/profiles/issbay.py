@@ -91,3 +91,14 @@ SALES_TERMS = [
 
 # Yaş kısıtı bu hesap için geçerli değil.
 MIN_TARGET_AGE_YEARS = None
+
+# Anlam bazlı AI incelemesi için işletme tarifi (bkz. app/ai_review.py).
+# Kelime kurallarından geçen aramalar bu tarife göre Claude tarafından
+# değerlendirilir; işletmeye uymayan aramalar negatif aday olur. Kararsız
+# kalınan aramalar işaretlenmez. Marka/rakip adı geçen aramalar zaten
+# incelemeye girmez. Tarif yanlış yakalama/kaçırma gördükçe güncellenir.
+AI_REVIEW_BRIEF = """İSBAY Kombi & Klima Servisi (İzmir): kombi servisi, klima servisi, doğalgaz servisi, bakım, arıza tespiti, montaj, gaz dolumu, periyodik bakım; sıfır ve ikinci el klima SATIŞI da yapıyor. Marka yetkili servisi değil, bağımsız (ücretli) servistir. Hizmet bölgesi İzmir.
+
+UYGUN (negatif yapma): kombi/klima arıza, bakım, servis, montaj, gaz dolumu, fiyat, randevu, klima satın alma (sıfır/ikinci el/kullanılmış), yaz-kış öncesi bakım, İzmir ve ilçeleri.
+
+UYGUN DEĞİL (negatif yap): oto/araç klima; beyaz eşya, buzdolabı, çamaşır/bulaşık makinesi, televizyon, bilgisayar, telefon tamiri; sıhhi tesisat/tesisatçı işleri; marka yetkili servis veya garanti kapsamında ücretsiz servis arayışı; kendin yap tamir/temizleme ürünü (sprey, malzeme) arayışı; iş ilanı; İzmir dışı şehirler."""

@@ -110,3 +110,14 @@ CONTEXT_SIGNAL_TERMS = [
 # Hedeflenen minimum yaş. Bunun altındaki bir yaş/ay geçen aramalar
 # negatif aday olarak işaretlenir. Yaş kısıtı olmayan hesaplarda None yapılır.
 MIN_TARGET_AGE_YEARS = 4
+
+# Anlam bazlı AI incelemesi için işletme tarifi (bkz. app/ai_review.py).
+# Kelime kurallarından geçen aramalar bu tarife göre Claude tarafından
+# değerlendirilir; işletmeye uymayan aramalar negatif aday olur. Kararsız
+# kalınan aramalar işaretlenmez. Marka/rakip adı geçen aramalar zaten
+# incelemeye girmez. Tarif yanlış yakalama/kaçırma gördükçe güncellenir.
+AI_REVIEW_BRIEF = """Atlas Spor Merkezi (İzmir, Buca): otizm, DEHB, down sendromu, gelişim geriliği gibi özel gereksinimli çocuk ve gençlere yönelik hareket eğitimi ve spor merkezi (masa tenisi, bisiklet, paten, cimnastik, futbol, basketbol; akran eğitimi, kaynaştırma, sosyal adaptasyon). Müşteri: 4 yaş ve üzeri özel gereksinimli bireyin ebeveyni ya da yakını.
+
+UYGUN (negatif yapma): özel gereksinimli çocuk için spor/hareket eğitimi, otizm/DEHB/down sendromu için spor merkezi, özel eğitim ve kaynaştırma sporu, fiyat/randevu/adres/yorum, yaz-kış kampı, İzmir ve çevresi.
+
+UYGUN DEĞİL (negatif yap): özel gereksinimle ilgisi olmayan sıradan spor/kurs/okul aramaları (genel jimnastik kursu, spor salonu/fitness üyeliği, yüzme, yoga, pilates, karate, dans, bale), yetişkin fitness, ücretsiz belediye/devlet hizmeti arayışı, tıbbi tedavi/ilaç/doktor/hastane aramaları, iş ilanı, 4 yaşından küçük bebek aramaları, İzmir dışı şehirler."""

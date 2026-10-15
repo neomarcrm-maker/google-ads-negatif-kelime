@@ -84,3 +84,14 @@ CONTEXT_SIGNAL_TERMS: list[str] = []
 
 # Yaş kısıtı bu hesap için geçerli değil.
 MIN_TARGET_AGE_YEARS = None
+
+# Anlam bazlı AI incelemesi için işletme tarifi (bkz. app/ai_review.py).
+# Kelime kurallarından geçen aramalar bu tarife göre Claude tarafından
+# değerlendirilir; işletmeye uymayan aramalar negatif aday olur. Kararsız
+# kalınan aramalar işaretlenmez. Marka/rakip adı geçen aramalar zaten
+# incelemeye girmez. Tarif yanlış yakalama/kaçırma gördükçe güncellenir.
+AI_REVIEW_BRIEF = """Çimenci (İzmir): canlı çim üretimi ve satışı, dükkanda suni çim satışı, peyzaj ve çim uygulaması (kurulum, çim döşeme). Satıcı taraf; müşteri çim satın almak ya da bahçe/villa/saha için uygulama yaptırmak isteyen kişidir. Hizmet bölgesi: İzmir, Antalya, Muğla, Aydın, Manisa, Çanakkale, Bursa, Denizli.
+
+UYGUN (negatif yapma): canlı/suni/rulo çim satın alma, fiyat ve metrekare fiyatı, çim döşeme ve uygulama, peyzaj ve bahçe düzenleme hizmeti, bu illerdeki aramalar.
+
+UYGUN DEĞİL (negatif yap): nasıl yetiştirilir/ekilir/biçilir/sulanır gibi kendin yap bilgi aramaları, çim tohumu, hasat/biçme makinesi ve aleti, ikinci el, iş ilanı, çim ile ilgisi olmayan anlamlar, hizmet bölgesi dışındaki şehirler (İstanbul, Ankara vb.)."""
